@@ -1,4 +1,6 @@
 [tools]
+"npm:npm" = "12.2.2"
+node = "24.22.3"
 java = "temurin-21.0.13+9.0.LTS"
 
 [env]

@@ -24,29 +24,29 @@ The same command also checks `schemas/record-type.v1.json`: the presets and vali
 From the repo root:
 
 ```sh
-bash spec/check.sh && npm ci && npx tsc --noEmit && npm run check:schemas
+npm run release:build && npm run typecheck && npm run check:schemas && npm run tlc && node --test --test-name-pattern='^(move|allowed|replay):' test/cli.test.mjs test/property.test.mjs
 ```
 
-`spec/check.sh` needs [mise](https://mise.jdx.dev), `curl` and Node. It installs the Java pinned in `.mise.toml`, downloads `tla2tools.jar` from the address pinned there into `~/.cache/ambitious/` and refuses it unless its SHA-256 matches the pin. It runs the model (must pass) and every variant in `spec/broken/` (each must break the rule named in `spec/broken/EXPECTED.json`). It takes about a minute and ends with a line that starts `OK:`. `npm run check:schemas` ends with `check:schemas: ok`.
+First install the pinned tools and dependencies with `mise trust -q .`, `mise install -q` and `npm ci`. [mise](https://mise.jdx.dev) provides Node and Java. `npm run tlc` calls `spec/check.sh`, which uses the shared kit runner and the repository's model checks. The runner downloads `tla2tools.jar` from the address pinned in `.mise.toml` and refuses it unless its SHA-256 matches the pin. The main model must pass and every variant in `spec/broken/` must break the rule named in `spec/broken/EXPECTED.json`. A successful shared-runner summary starts with `tlc: ok.`. `npm run check:schemas` ends with `check:schemas: ok`.
 
 ## Covered code
 
-Last confirmed in step with the code at commit `c04b3acf2f82843598eec2ff4ae41d932ede3a14`. At that commit the module's commands do not exist yet; the model describes the design in `spec/README.md` and the types in `src/domain/types.ts`.
+The model, domain schema and implementation mapping were verified at commit `31cd974710c48bc15970ce3c1e566468008e00db`. The mapping below must be checked whenever its covered files change. Advance the sync commit only after reviewing the mapping and running the command above against that commit.
 
 | Model part | Code it describes |
 |---|---|
 | `Types`, and the record `stages`, `initial`, `terminal`, `fields`, `transitions` | `RecordType` and `Transition` in `src/domain/types.ts`; the definitions stored by `type define` |
 | `Invoice`, `Booking`, `InventoryItem`, `Case` | `presets/*.json` |
-| `Closed` | `ParseRecordType`, and the rules in `DEFINITION_RULES` that say every named stage and field is declared |
-| start state | the `create` command: a record in the type's `initial` stage |
-| `Update` | the `update` command |
-| `Move`, `Declared`, `Required` | the `move` command; `DecideMove`, `MoveRefusal` |
-| `lastMove` | the `moved` row the `move` command adds to `record_events` (`RecordEvent`) |
+| `Closed` | `parseRecordType` in `src/domain/definition.ts` checks declared stages and fields and rejects outgoing transitions from terminal stages |
+| start state | `createRecord` in `src/db/store.ts` assigns the type's initial stage |
+| `Update` | `updateRecord` in `src/db/store.ts` applies field patches without changing the stage |
+| `Move`, `Declared`, `Required` | `decideMove` in `src/domain/records.ts` checks terminal status, declared transition and field presence; `moveOrThrow` reports refusals |
+| `lastMove` | `moveRecord` and `appendEvent` in `src/db/store.ts` update the stage and append a `moved` event in the command transaction |
 | `schemas/record-type.v1.json` | `RecordTypeDocument`, `FIELD_KINDS`, `UNIQUE_FIELD_KINDS`, `NAME_PATTERNS`, `DEFINITION_RULES` |
 
-Run `git log c04b3acf2f82843598eec2ff4ae41d932ede3a14..HEAD -- src/domain src/db spec schemas presets scripts`. If it lists commits, read them against the table before you trust a pass. Move the commit above forward only after you have confirmed that every row still describes the code at the new commit.
+Run `git log 31cd974710c48bc15970ce3c1e566468008e00db..HEAD -- src/domain src/db spec schemas presets scripts`. If it lists commits, read them against the table before you trust a pass. Move the commit above forward only after you have confirmed that every row still describes the code at the new commit.
 
-One `Move` step in the model is one transaction in the code: read the record, decide, write the new stage and the event. If `move` is ever split across transactions, or another command starts to change a record's stage, the model no longer describes the code; model that before relying on a pass.
+One `Move` step in the model is one transaction in the code: read the record, decide, write the new stage and the event. The shared kit runs write handlers transactionally; `src/cli/main.ts` declares `move` as a write command. If `move` is ever split across transactions, or another command starts to change a record's stage, the model no longer describes the code; model that before relying on a pass.
 
 ## Reading a result
 
@@ -89,13 +89,14 @@ To tell a path in the module's words:
 
 Types named `s1`, `s2`, `s3` with field `f1` are the small made-up types. A path through one of them is still a real path: write the same definition as a JSON document and replay it.
 
-To run one model by hand and keep the output, from the repo root:
+To run one model by hand with the checksum-verified jar, from the repo root:
 
 ```sh
-(cd spec/broken && mise exec -- java -cp ~/.cache/ambitious/tla2tools-*.jar tlc2.TLC -workers 1 -metadir "$(mktemp -d)" -noGenerateSpecTE -config MoveWithoutLookup.cfg MoveWithoutLookup.tla)
+tla_jar=$(node scripts/tla2tools.mjs)
+mise exec -- java -cp "$tla_jar" tlc2.TLC -workers 1 -metadir "$(mktemp -d)" -noGenerateSpecTE -config spec/broken/MoveWithoutLookup.cfg spec/broken/MoveWithoutLookup.tla
 ```
 
-When the model passes, the `PASS` line gives the number of distinct states TLC checked. `spec/check.sh` fails if that number is too small for the model to be exploring anything.
+When the model passes, the table reports the number of distinct states TLC checked. The repository's wrapper fails if that number is too small for the model to be exploring anything.
 
 A `FAIL:` line from `npm run check:schemas` names the file and what to fix.
 
