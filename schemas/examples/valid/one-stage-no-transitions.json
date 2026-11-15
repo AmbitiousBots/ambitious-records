@@ -1,0 +1,11 @@
+{
+  "type": "note",
+  "version": 3,
+  "fields": {},
+  "stages": [
+    "kept"
+  ],
+  "initial": "kept",
+  "transitions": [],
+  "terminal": []
+}

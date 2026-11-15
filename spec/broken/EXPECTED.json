@@ -1,0 +1,14 @@
+{
+  "MoveWithoutLookup": {
+    "invariant": "OnlyDeclaredTransitions",
+    "because": "Move no longer looks the move up in the type's declared transitions, so a record can go to any stage."
+  },
+  "MoveIgnoresTerminal": {
+    "invariant": "TerminalIsFinal",
+    "because": "Move no longer refuses a record in a terminal stage, so a type that declares a transition out of a terminal stage lets the record leave it."
+  },
+  "MoveSkipsRequiredFields": {
+    "invariant": "RequiredFieldsBeforeMove",
+    "because": "Move no longer checks the fields the transition requires, so a record can move while one of them is empty."
+  }
+}

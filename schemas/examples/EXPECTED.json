@@ -1,0 +1,123 @@
+{
+  "field-kind-unknown.json": {
+    "keyword": "enum",
+    "at": "/fields/total/kind"
+  },
+  "money-without-currency.json": {
+    "keyword": "required",
+    "at": "/fields/total"
+  },
+  "currency-not-three-capitals.json": {
+    "keyword": "pattern",
+    "at": "/fields/total/currency"
+  },
+  "currency-on-a-string-field.json": {
+    "keyword": "false schema",
+    "at": "/fields/reference/currency"
+  },
+  "enum-without-values.json": {
+    "keyword": "required",
+    "at": "/fields/notes"
+  },
+  "enum-with-empty-values.json": {
+    "keyword": "minItems",
+    "at": "/fields/notes/values"
+  },
+  "enum-value-listed-twice.json": {
+    "keyword": "uniqueItems",
+    "at": "/fields/notes/values"
+  },
+  "values-on-a-text-field.json": {
+    "keyword": "false schema",
+    "at": "/fields/notes/values"
+  },
+  "ref-without-type.json": {
+    "keyword": "required",
+    "at": "/fields/notes"
+  },
+  "ref-type-on-a-string-field.json": {
+    "keyword": "false schema",
+    "at": "/fields/reference/type"
+  },
+  "unique-on-a-text-field.json": {
+    "keyword": "const",
+    "at": "/fields/notes/unique"
+  },
+  "unique-on-a-money-field.json": {
+    "keyword": "const",
+    "at": "/fields/total/unique"
+  },
+  "field-option-unknown.json": {
+    "keyword": "additionalProperties",
+    "at": "/fields/notes"
+  },
+  "field-name-with-capitals.json": {
+    "keyword": "propertyNames",
+    "at": "/fields"
+  },
+  "type-name-with-space.json": {
+    "keyword": "pattern",
+    "at": "/type"
+  },
+  "version-zero.json": {
+    "keyword": "minimum",
+    "at": "/version"
+  },
+  "version-not-a-whole-number.json": {
+    "keyword": "type",
+    "at": "/version"
+  },
+  "stages-empty.json": {
+    "keyword": "minItems",
+    "at": "/stages"
+  },
+  "stage-listed-twice.json": {
+    "keyword": "uniqueItems",
+    "at": "/stages"
+  },
+  "initial-missing.json": {
+    "keyword": "required",
+    "at": ""
+  },
+  "terminal-missing.json": {
+    "keyword": "required",
+    "at": ""
+  },
+  "top-level-field-unknown.json": {
+    "keyword": "additionalProperties",
+    "at": ""
+  },
+  "transition-without-to.json": {
+    "keyword": "required",
+    "at": "/transitions/1"
+  },
+  "transition-from-empty-list.json": {
+    "keyword": "minItems",
+    "at": "/transitions/2/from"
+  },
+  "transition-option-unknown.json": {
+    "keyword": "additionalProperties",
+    "at": "/transitions/0"
+  },
+  "initial-not-a-stage.json": {
+    "rule": "initial-is-a-stage"
+  },
+  "terminal-not-a-stage.json": {
+    "rule": "terminal-are-stages"
+  },
+  "transition-to-unknown-stage.json": {
+    "rule": "transition-stages-are-stages"
+  },
+  "transition-from-unknown-stage.json": {
+    "rule": "transition-stages-are-stages"
+  },
+  "requires-unknown-field.json": {
+    "rule": "required-fields-are-fields"
+  },
+  "transition-out-of-terminal.json": {
+    "rule": "no-transition-out-of-terminal"
+  },
+  "transition-declared-twice.json": {
+    "rule": "transition-declared-once"
+  }
+}

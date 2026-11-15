@@ -1,0 +1,23 @@
+{
+  "type": "booking",
+  "version": 1,
+  "fields": {
+    "customer": { "kind": "string", "required": true },
+    "service": { "kind": "string" },
+    "starts": { "kind": "datetime" },
+    "ends": { "kind": "datetime" },
+    "party_size": { "kind": "int" },
+    "deposit_paid": { "kind": "bool" },
+    "notes": { "kind": "text" }
+  },
+  "stages": ["requested", "confirmed", "completed", "cancelled", "no_show"],
+  "initial": "requested",
+  "transitions": [
+    { "from": "requested", "to": "confirmed", "requires": ["starts"] },
+    { "from": "confirmed", "to": "requested" },
+    { "from": "confirmed", "to": "completed", "requires": ["starts", "ends"] },
+    { "from": "confirmed", "to": "no_show" },
+    { "from": ["requested", "confirmed"], "to": "cancelled" }
+  ],
+  "terminal": ["completed", "cancelled", "no_show"]
+}
