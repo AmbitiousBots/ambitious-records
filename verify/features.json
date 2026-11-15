@@ -1,0 +1,97 @@
+[
+  {
+    "id": "build",
+    "userVisible": "The module builds as a single versioned file with a published checksum.",
+    "check": "npm run --silent release:build"
+  },
+  {
+    "id": "commands",
+    "userVisible": "A caller can discover every command and whether it reads or writes data.",
+    "check": "node --test --test-name-pattern='^commands:' test/cli.test.mjs"
+  },
+  {
+    "id": "selfcheck",
+    "userVisible": "Selfcheck creates and migrates a fresh database, reports its runtime and integrity, and preserves existing records.",
+    "check": "node --test --test-name-pattern='^selfcheck:' test/cli.test.mjs"
+  },
+  {
+    "id": "types",
+    "userVisible": "A caller can define, list and read validated record types, add compatible versions and keep existing records on their original version.",
+    "check": "node --test --test-name-pattern='^(type-define|type-versions|type-schema):' test/cli.test.mjs"
+  },
+  {
+    "id": "create",
+    "userVisible": "New records start in their initial stage with validated values for all ten field kinds and valid references.",
+    "check": "node --test --test-name-pattern='^(create|field-kinds):' test/cli.test.mjs"
+  },
+  {
+    "id": "update",
+    "userVisible": "Field patches preserve omitted values, remove optional values and reject removal of required values.",
+    "check": "node --test --test-name-pattern='^update:' test/cli.test.mjs"
+  },
+  {
+    "id": "moves",
+    "userVisible": "Only declared moves with all required fields succeed, allowed lists missing fields, and terminal stages cannot move again.",
+    "check": "node --test --test-name-pattern='^(move|allowed):' test/cli.test.mjs"
+  },
+  {
+    "id": "uniqueness",
+    "userVisible": "Unique values belong to only one record of a type, including when writers run concurrently.",
+    "check": "node --test --test-name-pattern='^(uniqueness|concurrency):' test/cli.test.mjs"
+  },
+  {
+    "id": "idempotency",
+    "userVisible": "Retrying a request returns its original result without duplicate history, while reusing its key for another request is refused.",
+    "check": "node --test --test-name-pattern='^idempotency:' test/cli.test.mjs"
+  },
+  {
+    "id": "query",
+    "userVisible": "A caller can filter, sort and limit records with stable ordering and exact numeric comparisons.",
+    "check": "node --test --test-name-pattern='^query:' test/cli.test.mjs test/query.test.mjs"
+  },
+  {
+    "id": "history",
+    "userVisible": "Record history preserves every successful creation, patch and move in sequence order.",
+    "check": "node --test --test-name-pattern='^history:' test/cli.test.mjs"
+  },
+  {
+    "id": "replay",
+    "userVisible": "Replaying generated command histories reconstructs the same records returned by query.",
+    "check": "node --test test/property.test.mjs"
+  },
+  {
+    "id": "read-only",
+    "userVisible": "Analysis commands preserve stored records and database contents and never create a missing database.",
+    "check": "node --test --test-name-pattern='^read-only:' test/cli.test.mjs"
+  },
+  {
+    "id": "determinism",
+    "userVisible": "The same commands, inputs, timestamps and seeds produce the same output on independent databases.",
+    "check": "node --test --test-name-pattern='^determinism:' test/cli.test.mjs"
+  },
+  {
+    "id": "input-file",
+    "userVisible": "JSON input files behave like stdin and an explicit database path selects separate storage.",
+    "check": "node --test --test-name-pattern='^input-file:' test/cli.test.mjs"
+  },
+  {
+    "id": "release",
+    "userVisible": "The release checksum matches the asset and the copied binary runs without source files or installed dependencies.",
+    "check": "node --test test/release.test.mjs"
+  },
+  {
+    "id": "contract",
+    "userVisible": "Every command follows the common JSON envelope, exit-code, determinism, forbidden-path and read-only rules.",
+    "check": "npm run --silent contract"
+  },
+  {
+    "id": "standalone",
+    "userVisible": "Anyone can read and contribute to this repository: nothing in it points at a private plan or at one person's machine.",
+    "check": "node scripts/check-standalone.mjs"
+  },
+  {
+    "id": "models",
+    "userVisible": "Every model of how the software behaves passes the model checker, and every deliberately broken copy is caught breaking the rule it was written to break.",
+    "check": "npm run --silent tlc"
+  }
+]

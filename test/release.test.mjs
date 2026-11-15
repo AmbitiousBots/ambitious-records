@@ -1,0 +1,30 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { copyFileSync, mkdirSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { test } from "node:test";
+import { freshHome, preset, repoRoot, success } from "./helpers.mjs";
+
+test("release: the published checksum matches the executable single-file asset and it stores records without its source tree", (t) => {
+  const release = join(repoRoot, "release");
+  const filename = "ambitious-records-0.1.0.mjs";
+  const asset = join(release, filename);
+  assert.deepEqual(readdirSync(release).sort(), ["SHA256SUMS", filename].sort());
+  const sha256 = createHash("sha256").update(readFileSync(asset)).digest("hex");
+  assert.equal(readFileSync(join(release, "SHA256SUMS"), "utf8"), `${sha256}  ${filename}\n`);
+  assert.ok((statSync(asset).mode & 0o111) !== 0);
+  const home = freshHome(t);
+  const isolated = join(home, "isolated");
+  mkdirSync(isolated);
+  const copied = join(isolated, filename);
+  copyFileSync(asset, copied);
+  const options = { binary: copied, cwd: isolated, runtimeArgs: ["--permission", `--allow-fs-read=${home}`, `--allow-fs-write=${home}`] };
+  assert.deepEqual(success(home, "type define", preset("invoice"), options), { type: "invoice", version: 1 });
+  const record = success(home, "create", { type: "invoice", fields: { number: "one", amount: "1.25" }, idem_key: "one" }, options).record;
+  assert.deepEqual(success(home, "query", { type: "invoice" }, options).records, [record]);
+  const check = success(home, "selfcheck", undefined, options);
+  assert.deepEqual(check.problems, []);
+  assert.equal(check.binary.sha256, sha256);
+  assert.equal(check.db.integrityCheck, "ok");
+  assert.equal(check.db.userVersion, 1);
+});

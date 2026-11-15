@@ -1,4 +1,4 @@
-declare const brand: unique symbol;
+const brand: unique symbol = Symbol("records");
 
 type Brand<Base, Name extends string> = Base & { readonly [brand]: Name };
 
@@ -216,6 +216,8 @@ export type DecideMove = (
   to: string,
 ) => Result<Transition, MoveRefusal>;
 
-export const MODULE_ERROR_CODES = ["E_TRANSITION", "E_INCOMPATIBLE"] as const;
+export const MODULE_ERROR_CODES = ["E_TRANSITION", "E_INCOMPATIBLE", "E_NOT_FOUND", "E_UNIQUE", "E_IDEMPOTENCY"] as const;
 
 export type ModuleErrorCode = (typeof MODULE_ERROR_CODES)[number];
+
+export const makeRecordType = (value: Omit<RecordType, typeof brand>): RecordType => ({ ...value, [brand]: "RecordType" });

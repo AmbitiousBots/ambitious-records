@@ -8,7 +8,7 @@ Run it from the repo root:
 bash spec/check.sh
 ```
 
-The script needs [mise](https://mise.jdx.dev) (it installs the pinned Java), `curl` and Node. It downloads TLC, the model checker for the TLA+ language, as `tla2tools.jar` (version 1.8.0) from the address pinned in `.mise.toml`, keeps it in `~/.cache/ambitious/` and refuses a file whose SHA-256 differs from the pin. A run takes about a minute.
+Install the pinned Node and Java runtimes with [mise](https://mise.jdx.dev) by running `mise trust -q .` and `mise install -q`, then install dependencies with `npm ci`. The script uses `scripts/check-models.mjs` to check model coverage and delegates TLC execution to the shared kit runner. TLC is the model checker for the TLA+ language. The runner downloads `tla2tools.jar` from the address pinned in `.mise.toml` and refuses a file whose SHA-256 differs from the pin. It caches the jar under `TLA2TOOLS_CACHE_DIR`, or `tla2tools` inside `XDG_CACHE_HOME`, or `~/.cache/tla2tools` by default. A successful summary starts with `tlc: ok.`.
 
 ## `StageMachine.tla`: the model
 
@@ -59,18 +59,18 @@ Each file in `spec/broken/` is the model with one line of `Move` changed to a pl
 
 ## Which code this constrains
 
-The module's commands do not exist yet. When they are written:
+The command implementation is tied to the model as follows:
 
 | Code | Constrained by |
 |---|---|
-| `DecideMove` in `src/domain/types.ts`: whether a move is allowed, and why not | all three rules |
-| `AllowedMoves`: the next stages and the fields still missing for each | must agree with `DecideMove`: a stage is offered with nothing missing exactly when the move would succeed |
-| `ParseRecordType`: turning a type definition into a `RecordType` | the model's assumption `Closed`: `initial`, `terminal` and every transition name only declared stages, and `requires` only declared fields |
-| the `move` command: reads the record, decides, writes the new stage and a `moved` event | one `Move` step; it must be one database transaction |
+| `decideMove` in `src/domain/records.ts`: whether a move is allowed, and why not | all three rules |
+| `allowedMoves` in `src/domain/records.ts`: the next stages and the fields still missing for each | must agree with `decideMove`: a stage is offered with nothing missing exactly when the move would succeed |
+| `parseRecordType` in `src/domain/definition.ts`: turning a type definition into a `RecordType` | the model's assumption `Closed`: `initial`, `terminal` and every transition name only declared stages, and `requires` only declared fields |
+| `moveRecord` in `src/db/store.ts`, registered as a write command in `src/cli/main.ts`: reads the record, decides, writes the new stage and a `moved` event | one `Move` step; the shared kit runs the handler in one database transaction |
 
 ## What is not covered
 
-- The model checks the design, not the TypeScript. Tests must tie the code to it: a property test that drives `DecideMove` with generated types, field values and move orders and checks the same three rules.
+- The model checks the design, not the TypeScript. CLI tests exercise declared and refused moves and transition requirements. Property tests generate command sequences, check their expected outcomes and replay the returned history to compare it with query results.
 - Types larger than three stages and one field are checked only through the four presets.
 - A new version of a type. A record keeps the version it was created with; whether a later version may change which stages are terminal, and what happens to records then, is for the `type define` compatibility check and is not modeled.
 - Field values. The model knows only whether a field has a value. Kinds, `required` on a field and `unique` are not modeled.
