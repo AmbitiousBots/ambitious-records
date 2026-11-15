@@ -31,7 +31,7 @@ First install the pinned tools and dependencies with `mise trust -q .`, `mise in
 
 ## Covered code
 
-The model and domain-schema baseline was confirmed at commit `c04b3acf2f82843598eec2ff4ae41d932ede3a14`. The implementation mapping below must be checked whenever its covered files change. Advance the sync commit only after reviewing the mapping and running the command above against that commit.
+The model, domain schema and implementation mapping were verified at commit `31cd974710c48bc15970ce3c1e566468008e00db`. The mapping below must be checked whenever its covered files change. Advance the sync commit only after reviewing the mapping and running the command above against that commit.
 
 | Model part | Code it describes |
 |---|---|
@@ -44,7 +44,7 @@ The model and domain-schema baseline was confirmed at commit `c04b3acf2f82843598
 | `lastMove` | `moveRecord` and `appendEvent` in `src/db/store.ts` update the stage and append a `moved` event in the command transaction |
 | `schemas/record-type.v1.json` | `RecordTypeDocument`, `FIELD_KINDS`, `UNIQUE_FIELD_KINDS`, `NAME_PATTERNS`, `DEFINITION_RULES` |
 
-Run `git log c04b3acf2f82843598eec2ff4ae41d932ede3a14..HEAD -- src/domain src/db spec schemas presets scripts`. If it lists commits, read them against the table before you trust a pass. Move the commit above forward only after you have confirmed that every row still describes the code at the new commit.
+Run `git log 31cd974710c48bc15970ce3c1e566468008e00db..HEAD -- src/domain src/db spec schemas presets scripts`. If it lists commits, read them against the table before you trust a pass. Move the commit above forward only after you have confirmed that every row still describes the code at the new commit.
 
 One `Move` step in the model is one transaction in the code: read the record, decide, write the new stage and the event. The shared kit runs write handlers transactionally; `src/cli/main.ts` declares `move` as a write command. If `move` is ever split across transactions, or another command starts to change a record's stage, the model no longer describes the code; model that before relying on a pass.
 
