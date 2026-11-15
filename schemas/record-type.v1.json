@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AmbitiousBots/ambitious-records/blob/main/schemas/record-type.v1.json",
+  "title": "Record type definition, version 1",
+  "description": "Defines one kind of record as data: its fields, its stages, and the moves between stages that are allowed. Rules that compare one part of the document with another (for example that `initial` is one of `stages`) cannot be written in JSON Schema; they are listed in schemas/README.md and checked separately.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "version", "fields", "stages", "initial", "transitions", "terminal"],
+  "properties": {
+    "type": {
+      "description": "The name of the record type, for example `invoice`.",
+      "$ref": "#/$defs/typeName"
+    },
+    "version": {
+      "description": "The version of this definition. A later version of the same type has a higher number.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "fields": {
+      "description": "The fields a record of this type can hold, by field name.",
+      "type": "object",
+      "maxProperties": 64,
+      "propertyNames": { "$ref": "#/$defs/fieldName" },
+      "additionalProperties": { "$ref": "#/$defs/field" }
+    },
+    "stages": {
+      "description": "Every stage a record of this type can be in.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stageName" }
+    },
+    "initial": {
+      "description": "The stage a new record starts in. Must be one of `stages`.",
+      "$ref": "#/$defs/stageName"
+    },
+    "transitions": {
+      "description": "The allowed moves between stages. A move that is not listed here is refused.",
+      "type": "array",
+      "maxItems": 256,
+      "items": { "$ref": "#/$defs/transition" }
+    },
+    "terminal": {
+      "description": "Stages a record never leaves. Each must be one of `stages`.",
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stageName" }
+    }
+  },
+  "$defs": {
+    "typeName": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+    },
+    "fieldName": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$"
+    },
+    "stageName": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$"
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "description": "What kind of value the field holds.",
+          "enum": ["string", "text", "int", "decimal", "money", "date", "datetime", "bool", "enum", "ref"]
+        },
+        "required": {
+          "description": "When true, every record of this type must have a value for the field.",
+          "type": "boolean"
+        },
+        "unique": {
+          "description": "When true, no two records of this type may hold the same value. Allowed only for kinds whose values have one written form: string, int, date, datetime and ref.",
+          "type": "boolean"
+        },
+        "currency": {
+          "description": "For kind `money`: the three-letter currency code of the amount.",
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "values": {
+          "description": "For kind `enum`: the values the field may take.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+        },
+        "type": {
+          "description": "For kind `ref`: the record type the field points to.",
+          "$ref": "#/$defs/typeName"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "money" } } },
+          "then": { "properties": { "currency": true }, "required": ["currency"] },
+          "else": { "properties": { "currency": false } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "enum" } } },
+          "then": { "properties": { "values": true }, "required": ["values"] },
+          "else": { "properties": { "values": false } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "ref" } } },
+          "then": { "properties": { "type": true }, "required": ["type"] },
+          "else": { "properties": { "type": false } }
+        },
+        {
+          "if": { "properties": { "kind": { "enum": ["text", "decimal", "money", "bool", "enum"] } } },
+          "then": { "properties": { "unique": { "const": false } } }
+        }
+      ]
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "description": "The stage the move starts from, or a list of stages that can all make this move.",
+          "oneOf": [
+            { "$ref": "#/$defs/stageName" },
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 32,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/stageName" }
+            }
+          ]
+        },
+        "to": {
+          "description": "The stage the move ends in.",
+          "$ref": "#/$defs/stageName"
+        },
+        "requires": {
+          "description": "Fields that must have a value before the move is allowed.",
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/fieldName" }
+        }
+      }
+    }
+  }
+}

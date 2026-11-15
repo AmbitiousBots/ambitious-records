@@ -1,0 +1,80 @@
+{
+  "type": "every-field-kind",
+  "version": 1,
+  "fields": {
+    "a_string": {
+      "kind": "string",
+      "unique": true
+    },
+    "a_text": {
+      "kind": "text"
+    },
+    "an_int": {
+      "kind": "int",
+      "unique": true
+    },
+    "a_decimal": {
+      "kind": "decimal"
+    },
+    "an_amount": {
+      "kind": "money",
+      "currency": "JPY",
+      "unique": false
+    },
+    "a_date": {
+      "kind": "date",
+      "unique": true
+    },
+    "a_datetime": {
+      "kind": "datetime",
+      "required": true
+    },
+    "a_bool": {
+      "kind": "bool"
+    },
+    "a_choice": {
+      "kind": "enum",
+      "values": [
+        "small",
+        "large"
+      ]
+    },
+    "a_link": {
+      "kind": "ref",
+      "type": "order",
+      "unique": true
+    }
+  },
+  "stages": [
+    "open",
+    "shipped",
+    "done",
+    "cancelled"
+  ],
+  "initial": "open",
+  "transitions": [
+    {
+      "from": "open",
+      "to": "shipped",
+      "requires": [
+        "a_string",
+        "an_amount"
+      ]
+    },
+    {
+      "from": "shipped",
+      "to": "done"
+    },
+    {
+      "from": [
+        "open",
+        "shipped"
+      ],
+      "to": "cancelled"
+    }
+  ],
+  "terminal": [
+    "done",
+    "cancelled"
+  ]
+}

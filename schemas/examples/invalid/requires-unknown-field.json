@@ -1,0 +1,50 @@
+{
+  "type": "order",
+  "version": 1,
+  "fields": {
+    "reference": {
+      "kind": "string",
+      "required": true,
+      "unique": true
+    },
+    "total": {
+      "kind": "money",
+      "currency": "EUR"
+    },
+    "notes": {
+      "kind": "text"
+    }
+  },
+  "stages": [
+    "open",
+    "shipped",
+    "done",
+    "cancelled"
+  ],
+  "initial": "open",
+  "transitions": [
+    {
+      "from": "open",
+      "to": "shipped",
+      "requires": [
+        "reference",
+        "address"
+      ]
+    },
+    {
+      "from": "shipped",
+      "to": "done"
+    },
+    {
+      "from": [
+        "open",
+        "shipped"
+      ],
+      "to": "cancelled"
+    }
+  ],
+  "terminal": [
+    "done",
+    "cancelled"
+  ]
+}

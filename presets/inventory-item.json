@@ -1,0 +1,22 @@
+{
+  "type": "inventory-item",
+  "version": 1,
+  "fields": {
+    "sku": { "kind": "string", "required": true, "unique": true },
+    "name": { "kind": "string", "required": true },
+    "quantity": { "kind": "decimal" },
+    "unit": { "kind": "enum", "values": ["each", "box", "kg", "litre", "metre"] },
+    "unit_cost": { "kind": "money", "currency": "USD" },
+    "reorder_at": { "kind": "decimal" },
+    "location": { "kind": "string" }
+  },
+  "stages": ["in_stock", "low", "out_of_stock", "discontinued"],
+  "initial": "in_stock",
+  "transitions": [
+    { "from": "in_stock", "to": "low", "requires": ["quantity", "reorder_at"] },
+    { "from": ["in_stock", "low"], "to": "out_of_stock" },
+    { "from": ["low", "out_of_stock"], "to": "in_stock", "requires": ["quantity"] },
+    { "from": ["in_stock", "low", "out_of_stock"], "to": "discontinued" }
+  ],
+  "terminal": ["discontinued"]
+}

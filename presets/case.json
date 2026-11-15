@@ -1,0 +1,24 @@
+{
+  "type": "case",
+  "version": 1,
+  "fields": {
+    "title": { "kind": "string", "required": true },
+    "description": { "kind": "text" },
+    "priority": { "kind": "enum", "values": ["low", "normal", "high"] },
+    "opened": { "kind": "date" },
+    "assignee": { "kind": "string" },
+    "parent": { "kind": "ref", "type": "case" },
+    "resolution": { "kind": "text" }
+  },
+  "stages": ["open", "in_progress", "waiting", "resolved", "closed"],
+  "initial": "open",
+  "transitions": [
+    { "from": "open", "to": "in_progress", "requires": ["assignee"] },
+    { "from": "in_progress", "to": "waiting" },
+    { "from": "waiting", "to": "in_progress" },
+    { "from": ["in_progress", "waiting"], "to": "resolved", "requires": ["resolution"] },
+    { "from": "resolved", "to": "in_progress" },
+    { "from": ["open", "resolved"], "to": "closed" }
+  ],
+  "terminal": ["closed"]
+}

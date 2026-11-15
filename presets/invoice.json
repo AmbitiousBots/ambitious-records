@@ -1,0 +1,18 @@
+{
+  "type": "invoice",
+  "version": 1,
+  "fields": {
+    "number": { "kind": "string", "required": true, "unique": true },
+    "amount": { "kind": "money", "currency": "USD", "required": true },
+    "due": { "kind": "date" },
+    "customer": { "kind": "string" }
+  },
+  "stages": ["draft", "sent", "paid", "void"],
+  "initial": "draft",
+  "transitions": [
+    { "from": "draft", "to": "sent", "requires": ["number", "amount"] },
+    { "from": "sent", "to": "paid" },
+    { "from": ["draft", "sent"], "to": "void" }
+  ],
+  "terminal": ["paid", "void"]
+}
