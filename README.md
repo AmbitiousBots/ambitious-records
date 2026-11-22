@@ -77,7 +77,7 @@ Read commands open an existing database read-only. Run `selfcheck` first for a f
 
 ### Fields and type versions
 
-The type document follows [record-type.v1.json](schemas/record-type.v1.json). [Schema documentation](schemas/README.md) explains the definition rules. The four files in `presets/` are optional starting definitions; all record types use the same code paths.
+The type document follows [record-type.v1.json](schemas/record-type.v1.json). [Schema documentation](schemas/README.md) explains the definition rules. A type name is lower-case words joined by hyphens (`inventory-item`, not `inventory_item`); field and stage names are lower-case words joined by underscores. The four files in `presets/` are optional starting definitions; all record types use the same code paths.
 
 | Kind | JSON value |
 |---|---|
@@ -143,6 +143,6 @@ npm audit
 
 `release:check` runs the type, lint, dependency, schema, CLI, property, contract, formal-model and release checks. `verify/run` exercises every feature listed in [verify/features.json](verify/features.json) against fresh temporary data and retains logs at the printed evidence directory. [The verification skill](verify/SKILL.md) explains individual feature checks. [The formal skill](verify/formal/SKILL.md) describes the model's bounds and its correspondence to the implementation. A model pass checks the model, while CLI and property tests check the binary.
 
-`npm run release:build` writes `release/ambitious-records-0.1.0.mjs` and `release/SHA256SUMS`. The bundled file runs with Node 24 and needs no npm installation. Verify a downloaded file against `SHA256SUMS` before running it. The shared [Ambitious installer](https://github.com/AmbitiousBots/ambitious-kit) can install release assets into `$AMBITIOUS_HOME/bin` after verifying their checksums.
+`npm run release:build` writes `release/ambitious-records-0.1.1.mjs` and `release/SHA256SUMS`. The bundled file runs with Node 24 and needs no npm installation. Verify a downloaded file against `SHA256SUMS` before running it. The shared [Ambitious installer](https://github.com/AmbitiousBots/ambitious-kit) can install release assets into `$AMBITIOUS_HOME/bin` after verifying their checksums.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SECURITY.md](SECURITY.md). Licensed under Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE).
