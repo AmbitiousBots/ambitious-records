@@ -113,7 +113,7 @@ test("type-define: a type name with underscores is refused in plain words and th
   assert.equal(refusal.errors.length, 1);
   const [{ code, message, hint }] = refusal.errors;
   assert.equal(code, "E_INPUT_SCHEMA");
-  assert.equal(message, "Invalid record type definition: /type must be lower-case words joined by hyphens, up to 64 characters.");
+  assert.equal(message, "Invalid record type definition: /type must be lower-case words joined by hyphens, starting with a letter, up to 64 characters.");
   assert.match(hint, /hyphens between words, not underscores/u);
   assert.match(hint, /inventory-item, not inventory_item/u);
   for (const text of [message, hint]) {
@@ -121,11 +121,21 @@ test("type-define: a type name with underscores is refused in plain words and th
     assert.doesNotMatch(text, /[\^$[\]*+]/u, "no regular expression in the answer");
   }
   const reference = call(home, "type define", { ...simple(), fields: { owner: { kind: "ref", type: "sales_deal" } } });
-  assert.equal(reference.errors[0].message, "Invalid record type definition: /fields/owner/type must be lower-case words joined by hyphens, up to 64 characters.");
+  assert.equal(reference.errors[0].message, "Invalid record type definition: /fields/owner/type must be lower-case words joined by hyphens, starting with a letter, up to 64 characters.");
   assert.equal(reference.errors[0].hint, hint);
   const lookup = call(home, "type get", { type: "sales_deal" });
-  assert.equal(lookup.errors[0].message, "type must be lower-case words joined by hyphens, up to 64 characters.");
+  assert.equal(lookup.errors[0].message, "type must be lower-case words joined by hyphens, starting with a letter, up to 64 characters.");
   assert.equal(lookup.errors[0].hint, hint);
+  const rule = "/type must be lower-case words joined by hyphens, starting with a letter, up to 64 characters";
+  const longAndMalformed = call(home, "type define", { ...simple(), type: "a_".repeat(40) });
+  assert.equal(longAndMalformed.errors[0].message, `Invalid record type definition: ${rule}.`, "the rule is said once when a name is too long and uses underscores");
+  assert.equal(longAndMalformed.errors[0].hint, hint);
+  const leadingDigit = call(home, "type define", { ...simple(), type: "3d-model" });
+  assert.equal(leadingDigit.errors[0].message, `Invalid record type definition: ${rule}.`);
+  assert.match(leadingDigit.errors[0].hint, /starting with a letter/u);
+  const notText = call(home, "type define", { ...simple(), type: 5 });
+  assert.equal(notText.errors[0].message, "Invalid record type definition: /type must be string.");
+  assert.doesNotMatch(notText.errors[0].hint, /hyphens/u);
   assert.deepEqual(success(home, "type define", { ...simple(), type: "sales-deal" }), { type: "sales-deal", version: 1 });
   assert.deepEqual(success(home, "type list").types.map(({ type }) => type), ["sales-deal"]);
 });

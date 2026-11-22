@@ -77,7 +77,7 @@ Read commands open an existing database read-only. Run `selfcheck` first for a f
 
 ### Fields and type versions
 
-The type document follows [record-type.v1.json](schemas/record-type.v1.json). [Schema documentation](schemas/README.md) explains the definition rules. A type name is lower-case words joined by hyphens (`inventory-item`, not `inventory_item`); field and stage names are lower-case words joined by underscores. The four files in `presets/` are optional starting definitions; all record types use the same code paths.
+The type document follows [record-type.v1.json](schemas/record-type.v1.json). [Schema documentation](schemas/README.md) explains the definition rules. A type name is lower-case words joined by hyphens, starting with a letter, up to 64 characters (`inventory-item`, not `inventory_item`); field and stage names are lower-case words joined by underscores. The four files in `presets/` are optional starting definitions; all record types use the same code paths.
 
 | Kind | JSON value |
 |---|---|

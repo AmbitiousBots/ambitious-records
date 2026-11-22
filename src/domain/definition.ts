@@ -31,13 +31,13 @@ const parseField = (document: FieldDocument): Field => {
   }
 };
 
-const brokeTypeNameRule = (error: ErrorObject): boolean => error.schemaPath.startsWith("#/$defs/typeName/");
+const brokeTypeNameRule = (error: ErrorObject): boolean => error.schemaPath.startsWith("#/$defs/typeName/") && error.keyword !== "type";
 
 export const parseRecordType = (raw: unknown): RecordType => {
   if (!validateDocument(raw)) {
     const errors = validateDocument.errors ?? [];
     const reasons = errors.map((error) => `${error.instancePath || "/"} ${brokeTypeNameRule(error) ? TYPE_NAME_RULE : error.message}`);
-    return invalid(`Invalid record type definition: ${reasons.join("; ") || "schema mismatch"}.`, errors.some(brokeTypeNameRule) ? TYPE_NAME_HINT : undefined);
+    return invalid(`Invalid record type definition: ${[...new Set(reasons)].join("; ") || "schema mismatch"}.`, errors.some(brokeTypeNameRule) ? TYPE_NAME_HINT : undefined);
   }
   const fields = new Map<FieldName, Field>(Object.entries(raw.fields).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0).map(([name, field]) => [fieldName(name), parseField(field)]));
   const stages = nonEmpty(raw.stages.map(stageName));

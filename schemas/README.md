@@ -16,7 +16,7 @@
 
 ## What the schema says
 
-- **Names.** A type name is lower-case words joined by hyphens (`inventory-item`). Field and stage names are lower-case words joined by underscores (`unit_cost`, `in_progress`). Each is at most 64 characters.
+- **Names.** A type name is lower-case words joined by hyphens, starting with a letter (`inventory-item`). Field and stage names are lower-case words joined by underscores (`unit_cost`, `in_progress`). Each is at most 64 characters.
 - **Field kinds.** `string`, `text`, `int`, `decimal`, `money`, `date`, `datetime`, `bool`, `enum` and `ref`. A `money` field must name its `currency` (three capital letters). An `enum` field must list its `values`. A `ref` field must name the record `type` it points to. These three options are rejected on any other kind.
 - **`required` and `unique`** are optional and default to false. `unique` is allowed only on `string`, `int`, `date`, `datetime` and `ref`: kinds whose values have exactly one written form, so "the same value" has one meaning. Allowing more kinds later accepts more documents and breaks none.
 - **Stages.** At least one, no repeats.
