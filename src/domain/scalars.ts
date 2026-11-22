@@ -3,9 +3,12 @@ import { isRecord } from "@ambitious/kit/domain/json";
 import { isFieldName, isStageName, isTypeName } from "./types.ts";
 import type { Actor, CalendarDate, DecimalText, EventSeq, FieldName, IdemKey, Instant, RecordId, StageName, TypeName, TypeVersion } from "./types.ts";
 
-export const invalid = (message: string): never => {
-  throw failure("E_INPUT_SCHEMA", message, "Use the documented command shape and field values.");
+export const invalid = (message: string, hint = "Use the documented command shape and field values."): never => {
+  throw failure("E_INPUT_SCHEMA", message, hint);
 };
+
+export const TYPE_NAME_RULE = "must be lower-case words joined by hyphens, starting with a letter, up to 64 characters";
+export const TYPE_NAME_HINT = "Write the type name in lower case, starting with a letter, with hyphens between words, not underscores, spaces or capitals: inventory-item, not inventory_item. Field and stage names use underscores.";
 
 export const object = (raw: unknown, label = "Input"): Readonly<Record<string, unknown>> => {
   if (!isRecord(raw)) return invalid(`${label} must be an object.`);
@@ -23,7 +26,7 @@ export const string = (raw: unknown, label: string): string => {
 
 export const typeName = (raw: unknown): TypeName => {
   const value = string(raw, "type");
-  if (!isTypeName(value)) return invalid("type must be lower-case words joined by hyphens, up to 64 characters.");
+  if (!isTypeName(value)) return invalid(`type ${TYPE_NAME_RULE}.`, TYPE_NAME_HINT);
   return value;
 };
 
