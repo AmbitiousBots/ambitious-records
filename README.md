@@ -57,7 +57,7 @@ The database is at `$AMBITIOUS_HOME/records/records.sqlite`. Use `--db file` to 
 
 ## Command interface
 
-Pass JSON on stdin or with `--in file`. `--in` accepts a file path, not inline JSON. All commands accept `--db`, `--now`, `--seed` and `--json`. Output is always one JSON envelope with `ok`, `schemaVersion`, `module`, `command`, `data`, `errors` and `meta`. Exit status is 0 for success, 1 for a caller error and 2 for an internal or database error. `meta` reports the timestamp, seed and binary version.
+Pass JSON on stdin or with `--in file`. `--in` accepts a file path, not inline JSON. All commands accept `--db`, `--now`, `--seed` and `--json`. Use `--help` for the command list or `<command> --help` for one entry. Output is always one JSON envelope with `ok`, `schemaVersion`, `module`, `command`, `data`, `errors` and `meta`. Exit status is 0 for success, 1 for a caller error and 2 for an internal or database error. `meta` reports the timestamp, seed and binary version.
 
 | Command | Input | Successful `data` | Database access |
 |---|---|---|---|
@@ -143,6 +143,6 @@ npm audit
 
 `release:check` runs the type, lint, dependency, schema, CLI, property, contract, formal-model and release checks. `verify/run` exercises every feature listed in [verify/features.json](verify/features.json) against fresh temporary data and retains logs at the printed evidence directory. [The verification skill](verify/SKILL.md) explains individual feature checks. [The formal skill](verify/formal/SKILL.md) describes the model's bounds and its correspondence to the implementation. A model pass checks the model, while CLI and property tests check the binary.
 
-`npm run release:build` writes `release/ambitious-records-0.1.2.mjs` and `release/SHA256SUMS`. The bundled file runs with Node 24 and needs no npm installation. Verify a downloaded file against `SHA256SUMS` before running it. The shared [Ambitious installer](https://github.com/AmbitiousBots/ambitious-kit) can install release assets into `$AMBITIOUS_HOME/bin` after verifying their checksums.
+`npm run release:build` writes `release/ambitious-records-0.1.2.mjs` and `release/SHA256SUMS`. The file bundles Ambitious Kit 0.4.9 and runs with Node 24 without an npm installation. Verify a downloaded file against `SHA256SUMS` before running it. The shared [Ambitious installer](https://github.com/AmbitiousBots/ambitious-kit) can install release assets into `$AMBITIOUS_HOME/bin` after verifying their checksums.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SECURITY.md](SECURITY.md). Licensed under Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE).

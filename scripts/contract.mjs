@@ -15,7 +15,10 @@ const sourcePath = fileURLToPath(import.meta.resolve("@ambitious/kit/contract/ch
 const source = readFileSync(sourcePath, "utf8");
 const inputLine = 'const stdin = input ? "{}" : "";';
 if (source.split(inputLine).length !== 2) throw new Error("The shared read-only probe changed. Review the command input adapter before running it.");
-const adapted = source.replace(inputLine, `const stdin = input ? JSON.stringify(${JSON.stringify(fixtures)}[name] ?? {}) : "";`);
+const readProbe = `const fixtures = ${JSON.stringify(fixtures)};
+    if (input && !Object.hasOwn(fixtures, name)) throw new Error('Add valid read-only contract input for ' + name + '.');
+    const stdin = input ? JSON.stringify(fixtures[name]) : "";`;
+const adapted = source.replace(inputLine, readProbe);
 const output = resolve(".build/contract-checks.mjs");
 mkdirSync(dirname(output), { recursive: true });
 await build({ stdin: { contents: adapted, resolveDir: dirname(sourcePath), sourcefile: "contract-checks.js" },
