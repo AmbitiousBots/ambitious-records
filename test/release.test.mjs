@@ -7,7 +7,7 @@ import { freshHome, preset, repoRoot, success } from "./helpers.mjs";
 
 test("release: the published checksum matches the executable single-file asset and it stores records without its source tree", (t) => {
   const release = join(repoRoot, "release");
-  const filename = "ambitious-records-0.1.1.mjs";
+  const filename = "ambitious-records-0.1.2.mjs";
   const asset = join(release, filename);
   assert.deepEqual(readdirSync(release).sort(), ["SHA256SUMS", filename].sort());
   const sha256 = createHash("sha256").update(readFileSync(asset)).digest("hex");

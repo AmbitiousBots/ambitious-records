@@ -34,7 +34,7 @@ export const call = (home, command, input, options = {}) => {
   assert.equal(envelope.module, "records");
   assert.equal(envelope.command, args.join(" "));
   assert.equal(envelope.schemaVersion, 1);
-  assert.equal(envelope.meta.version, "0.1.1");
+  assert.equal(envelope.meta.version, "0.1.2");
   assert.equal(envelope.meta.seed, 7);
   assert.equal(envelope.meta.now, options.now ?? now);
   return { ...envelope, exit: result.status, stdout: result.stdout, stderr: result.stderr };

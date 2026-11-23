@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.build/
 release/
 .kit-source/
 .kit-assets/
