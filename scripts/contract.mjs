@@ -1,20 +1,34 @@
-import assert from "node:assert/strict";
-import { runContract } from "./contract-checks.mjs";
+import { mkdirSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { build } from "esbuild";
 
-const fixtures = new Map([
-  ["type get", { type: "entry" }],
-  ["query", { type: "entry" }],
-  ["allowed", { id: "missing-record" }],
-  ["history", { id: "missing-record" }],
-]);
-const results = runContract("dist/ambitious-records.mjs", (name) => {
-  assert(fixtures.has(name), `Add valid read-only contract input for ${name}.`);
-  return fixtures.get(name);
-});
+const [binary = "dist/ambitious-records.mjs", ...extra] = process.argv.slice(2);
+if (extra.length > 0 || binary.startsWith("--")) throw new Error("Usage: node scripts/contract.mjs [built-module]");
+const fixtures = {
+  "type get": { type: "entry" },
+  query: { type: "entry" },
+  allowed: { id: "missing-record" },
+  history: { id: "missing-record" },
+};
+const sourcePath = fileURLToPath(import.meta.resolve("@ambitious/kit/contract/checks"));
+const source = readFileSync(sourcePath, "utf8");
+const inputLine = 'const stdin = input ? "{}" : "";';
+if (source.split(inputLine).length !== 2) throw new Error("The shared read-only probe changed. Review the command input adapter before running it.");
+const adapted = source.replace(inputLine, `const stdin = input ? JSON.stringify(${JSON.stringify(fixtures)}[name] ?? {}) : "";`);
+const output = resolve(".build/contract-checks.mjs");
+mkdirSync(dirname(output), { recursive: true });
+await build({ stdin: { contents: adapted, resolveDir: dirname(sourcePath), sourcefile: "contract-checks.js" },
+  bundle: true, format: "esm", platform: "node", outfile: output, logLevel: "silent" });
+const { runContract } = await import(pathToFileURL(output).href);
+const results = runContract(binary);
+const width = Math.max(...results.map(({ id }) => id.length));
 for (const { id, title, problems } of results) {
-  process.stdout.write(`${problems.length === 0 ? "ok  " : "FAIL"}  ${id.padEnd(19)} ${title}\n`);
+  process.stdout.write(`${problems.length === 0 ? "ok  " : "FAIL"}  ${id.padEnd(width)}  ${title}\n`);
   for (const problem of problems) process.stdout.write(`      ${problem}\n`);
 }
-const passed = results.filter(({ problems }) => problems.length === 0).length;
-process.stdout.write(`contract: ${passed === results.length ? "ok" : "FAILED"}. ${passed} of ${results.length} checks passed for dist/ambitious-records.mjs.\n`);
-process.exitCode = passed === results.length ? 0 : 1;
+const failed = results.filter(({ problems }) => problems.length > 0).length;
+process.stdout.write(failed === 0
+  ? `contract: ok. ${results.length} of ${results.length} checks passed for ${binary}.\n`
+  : `contract: ${failed} of ${results.length} checks failed for ${binary}.\n`);
+process.exitCode = failed === 0 ? 0 : 1;
